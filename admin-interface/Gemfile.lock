@@ -38,7 +38,7 @@ GEM
     toml-rb (2.2.0)
       citrus (~> 3.0, > 3.0)
     unicode-display_width (2.3.0)
-    webrick (1.7.0)
+    webrick (1.9.1)
 
 PLATFORMS
   x86_64-linux
@@ -58,7 +58,7 @@ DEPENDENCIES
   sysrandom
   toml-rb
   unicode-display_width
-  webrick (~> 1.7)
+  webrick (~> 1.9)
 
 BUNDLED WITH
    2.3.7
