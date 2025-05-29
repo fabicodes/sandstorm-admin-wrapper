@@ -1,48 +1,63 @@
-FROM ruby:3-slim-bookworm
+FROM ruby:3-slim-bookworm AS sandstorm-wrapper
 
 
-RUN apt-get update
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    wget \
+    make \
+    gcc \
+    g++ \
+    libssl-dev \
+    pkg-config \
+    lib32gcc-s1 \
+    ruby-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# General dependencies
-RUN apt-get install -y wget make gcc
-
-# Install Steamcmd dependencies
-RUN apt-get install -y lib32gcc-s1
-
-# Install Locales package for Steamcmd to avoid Warnings about being not being able to set to en_US.UTF-8
-RUN apt-get install -y locales && \
-    # Override all localisation settings to en_US.UTF-8 as default
+# Configure locales
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends locales && \
+    rm -rf /var/lib/apt/lists/* && \
     echo "LC_ALL=en_US.UTF-8" >> /etc/environment && \
-    # Tell locale.gen to generate en_US.UTF-8 with UTF-8 encoding
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
-    # Set the default language to en_US.UTF-8
-    echo "LANG=en_US.UTF-8" > /etc/locale.conf && \
-    # Run locale-gen to ensure en_US.UTF-8 is generated
+    echo "LANG=en_US.UTF-8" > /etc/default/locale && \
     locale-gen en_US.UTF-8
 
-# Sandstorm server won't run under root
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
+ENV BUNDLE_PATH /home/sandstorm/admin-interface/vendor/bundle
+ENV GEM_HOME $BUNDLE_PATH
+ENV BUNDLE_APP_CONFIG /home/sandstorm/admin-interface/.bundle
+ENV PATH $GEM_HOME/bin:$PATH
+
 RUN useradd -ms /bin/bash sandstorm
 
-USER sandstorm
 WORKDIR /home/sandstorm
 
 COPY --chown=sandstorm:sandstorm . .
 
 RUN wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
-RUN mv steamcmd_linux.tar.gz steamcmd/installation/
-RUN cd steamcmd/installation && tar -xvf steamcmd_linux.tar.gz
-RUN rm steamcmd/installation/steamcmd_linux.tar.gz
 
-# Add config for docker container
+RUN mkdir -p steamcmd/installation && \
+    mv steamcmd_linux.tar.gz steamcmd/installation/
+
+RUN cd steamcmd/installation && \
+    tar -xvf steamcmd_linux.tar.gz && \
+    rm steamcmd_linux.tar.gz
 
 RUN cp config/config.toml.docker config/config.toml
-
-RUN gem install bundler
-
+RUN gem install bundler --conservative
 WORKDIR /home/sandstorm/admin-interface
 
-RUN /bin/bash -c bundle
+RUN bundle install --jobs=$(nproc)
 
 WORKDIR /home/sandstorm
+RUN chown -R sandstorm:sandstorm /home/sandstorm
+USER sandstorm
+CMD ["/home/sandstorm/docker_start.sh"]
 
-CMD ./docker_start.sh
+# Expose necessary ports (adjust if your application uses different ports)
+# Example: EXPOSE 3000
+# EXPOSE 27015/udp
+# EXPOSE 27016/udp

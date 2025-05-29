@@ -162,7 +162,6 @@ MUTATORS = {
   'AntiMaterielRiflesOnly' => { 'name' => 'Anti-Materiel Only', 'description' => 'Only anti-materiel rifles are available along with normal equipment and explosives.' },
   'BoltActionsOnly' => { 'name' => 'Bolt-Actions Only', 'description' => 'Only bolt-action rifles are available along with normal equipment and explosives.' },
   'ArmsRace' => { 'name' => 'Arm\'s Race', 'description' => 'Every two kills give a new weapon. A kill with the final weapon wins the round.' },
-  'BoltActionsOnly' => { 'name' => 'Bolt-actions Only', 'description' => 'Only bolt-action rifles are available along with normal equipment and explosives.' },
   'Broke' => { 'name' => 'Broke', 'description' => 'Start with 0 supply points.' },
   'BudgetAntiquing' => { 'name' => 'Budget Antiquing', 'description' => 'Normal equipment and explosives, but limited to old and inexpensive weapons.' },
   'BulletSponge' => { 'name' => 'Bullet Sponge', 'description' => 'Health is increased.' },
